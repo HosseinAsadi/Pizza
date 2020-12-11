@@ -1,0 +1,7 @@
+db.sqlite3
+api/migrations/00*.py
+linux server.txt
+pizza/settings.py
+media/Images/*
+media/userImages/*
+venv/
