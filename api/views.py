@@ -566,6 +566,9 @@ def insert_user_order(request):
                     payment_type=pay_type,
                     is_pre_order=is_pre,
                 )
+                if is_pre:
+                    order.completed = True
+                    order.status = True
                 order.save()
 
                 foods = info['foods']
