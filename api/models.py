@@ -150,7 +150,7 @@ class Food(models.Model):
         return context
 
     def __str__(self):
-        return self.group.name + ' ' + self.name + ' foodId: ' + str(self.food_id)
+        return self.name + ' foodId: ' + str(self.food_id)
 
 
 class Option(models.Model):
@@ -214,6 +214,9 @@ class FoodSize(models.Model):
             context.update({'name': self.option.name})
         return context
 
+    def __str__(self):
+        return self.size + ' ' + str(self.food_size_id)
+
 
 class FoodOption(models.Model):
     food = models.ForeignKey(Food, on_delete=models.CASCADE)
@@ -233,6 +236,9 @@ class OptionType(models.Model):
             'children': children,
         }
 
+    def __str__(self):
+        return self.name + ' ' + str(self.id)
+
 
 class FoodType(models.Model):
     food_type_id = models.AutoField(primary_key=True)
@@ -251,6 +257,9 @@ class FoodType(models.Model):
             'childOfOptionType': child,
             'price': self.price,
         }
+
+    def __str__(self):
+        return self.type + ' ' + str(self.food_type_id)
 
 
 class Favorite(models.Model):
