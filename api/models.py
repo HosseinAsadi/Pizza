@@ -98,8 +98,8 @@ class Group(models.Model):
 
 
 class DoubleOptions(models.Model):
-    name1 = models.CharField(max_length=50)
-    name2 = models.CharField(max_length=50)
+    name1 = models.CharField(max_length=50, blank=True, null=True)
+    name2 = models.CharField(max_length=50, blank=True, null=True)
     options_extra_price = models.FloatField()
 
     def to_json(self):
