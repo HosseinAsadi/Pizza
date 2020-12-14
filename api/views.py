@@ -536,27 +536,27 @@ def is_between(time, time_range):
 def res_opening(request):
     # if not RestaurantInfo.objects.first().open:
     #     my_response(True, '', False)
+    if request.method == 'GET':
+        try:
+            res_time = RestaurantTime.objects.first()
+            if not res_time.status:
+                my_response(True, '', False)
 
-    try:
-        res_time = RestaurantTime.objects.first()
-        if not res_time.status:
-            my_response(True, '', False)
+            time_now = str(datetime.datetime.now().time()).split(':')
+            time_now = time_now[0] + ':' + time_now[1]
 
-        time_now = str(datetime.datetime.now().time()).split(':')
-        time_now = time_now[0] + ':' + time_now[1]
+            st = str(res_time.start).split(':')
+            st = st[0] + ':' + st[1]
 
-        st = str(res_time.start).split(':')
-        st = st[0] + ':' + st[1]
+            et = str(res_time.end).split(':')
+            et = et[0] + ':' + et[1]
 
-        et = str(res_time.end).split(':')
-        et = et[0] + ':' + et[1]
+            if not is_between(time_now, (st, et)):
+                my_response(True, '', False)
 
-        if not is_between(time_now, (st, et)):
-            my_response(True, '', False)
-
-        my_response(True, '', True)
-    except Exception as e:
-        my_response(False, str(e), {})
+            my_response(True, '', True)
+        except Exception as e:
+            my_response(False, str(e), {})
 
 
 @csrf_exempt
