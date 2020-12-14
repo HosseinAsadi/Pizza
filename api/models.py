@@ -197,7 +197,7 @@ class FoodSize(models.Model):
     food_size_id = models.AutoField(primary_key=True)
     food = models.ForeignKey(Food, on_delete=models.CASCADE, null=True, blank=True)
     option = models.ForeignKey(Option, on_delete=models.CASCADE, null=True, blank=True)
-    size = models.CharField(max_length=50)
+    size = models.CharField(max_length=50, blank=True)
     price = models.FloatField()
     extra_type_price = models.FloatField(default=0.0)
     extra_option_price = models.FloatField(default=0.0)
@@ -244,7 +244,7 @@ class FoodType(models.Model):
     food_type_id = models.AutoField(primary_key=True)
     food = models.ForeignKey(Food, on_delete=models.CASCADE)
     option_type = models.ForeignKey(OptionType, on_delete=models.CASCADE, blank=True, null=True)
-    type = models.CharField(max_length=50)
+    type = models.CharField(max_length=50, blank=True)
     price = models.FloatField()
 
     def to_json(self):
