@@ -295,6 +295,7 @@ class Order(models.Model):
     description = models.CharField(max_length=200, blank=True, null=True)
     address = models.ForeignKey(Address, on_delete=models.CASCADE, blank=True, null=True)
     delivery_time = models.CharField(max_length=10)
+    delivery_datetime = models.DateTimeField(blank=True, null=True)
     service_charge = models.FloatField(default=1.0)
     is_pre_order = models.BooleanField(default=False)
 
@@ -311,6 +312,7 @@ class Order(models.Model):
             'orderType': self.order_type,
             'deliveryCost': self.delivery_cost,
             'deliveryTime': self.delivery_time,
+            'deliveryDatetime': self.delivery_datetime,
             'isPreOrder': self.is_pre_order,
         }
 
