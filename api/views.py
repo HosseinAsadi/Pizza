@@ -526,6 +526,36 @@ def user_address(request, address_id=None):
         return my_response(False, 'invalid token', {})
 
 
+def is_between(time, time_range):
+    if time_range[1] < time_range[0]:
+        return time >= time_range[0] or time <= time_range[1]
+    return time_range[0] <= time <= time_range[1]
+
+
+@csrf_exempt
+def res_opening(request):
+    # if not RestaurantInfo.objects.first().open:
+    #     my_response(True, '', False)
+
+    res_time = RestaurantTime.objects.first()
+    if not res_time.status:
+        my_response(True, '', False)
+
+    time_now = str(datetime.datetime.now().time()).split(':')
+    time_now = time_now[0] + ':' + time_now[1]
+
+    st = str(res_time.start).split(':')
+    st = st[0] + ':' + st[1]
+
+    et = str(res_time.end).split(':')
+    et = et[0] + ':' + et[1]
+
+    if not is_between(time_now, (st, et)):
+        my_response(True, '', False)
+
+    my_response(True, '', True)
+
+
 @csrf_exempt
 def insert_user_order(request):
     if request.method == 'POST':

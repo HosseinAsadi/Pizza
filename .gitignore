@@ -2,6 +2,7 @@ db.sqlite3
 api/migrations/00*.py
 linux server.txt
 pizza/settings.py
+pizza/wsgi.py
 media/Images/*
 media/userImages/*
 venv/

@@ -53,6 +53,7 @@ urlpatterns = [
     path('ordersToday/', admin.orders_today),
     path('resRole/', admin.res_role),
     path('acceptRejectOrder/', admin.accept_reject_order),
+    path('checkResOpening/', views.res_opening),
 ]
 
 if settings.DEBUG:
