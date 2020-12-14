@@ -552,11 +552,11 @@ def res_opening(request):
             et = et[0] + ':' + et[1]
 
             if not is_between(time_now, (st, et)):
-                my_response(True, '', False)
+                return my_response(True, '', False)
 
-            my_response(True, '', True)
+            return my_response(True, '', True)
         except Exception as e:
-            my_response(False, str(e), {})
+            return my_response(False, str(e), {})
 
 
 @csrf_exempt
