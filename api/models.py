@@ -245,7 +245,7 @@ class FoodType(models.Model):
     food = models.ForeignKey(Food, on_delete=models.CASCADE)
     option_type = models.ForeignKey(OptionType, on_delete=models.CASCADE, blank=True, null=True)
     type = models.CharField(max_length=50, blank=True)
-    price = models.FloatField()
+    price = models.FloatField(default=0.0)
 
     def to_json(self):
         child = False

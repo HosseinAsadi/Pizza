@@ -357,6 +357,8 @@ def get_home_info(request):
                         else:
                             child_list.append(c.to_json())
 
+                child_list.insert(0, child_list.pop())
+
                 group_with_children.append(g.to_json(child_list))
 
             # if rate number changed go to update food group api and change that
