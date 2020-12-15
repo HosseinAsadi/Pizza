@@ -890,6 +890,10 @@ def notif_to_admin(**kwargs):
         if kwargs['is_pre_order']:
             st = RestaurantTime.objects.first()
             t = t + ' ' + str(st.start)
+            notif.update({
+                'isScheduled': True,
+                'scheduledTime': t,
+            })
             data.update({
                 'isScheduled': True,
                 'scheduledTime': t,
