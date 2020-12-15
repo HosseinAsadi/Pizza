@@ -602,9 +602,13 @@ def insert_user_order(request):
                     payment_type=pay_type,
                     is_pre_order=is_pre,
                 )
+                title = 'order'
+                mess = 'you have a order with trackId: '
                 if is_pre:
                     order.completed = True
                     order.status = True
+                    title = 'pre order'
+                    mess = 'you have a pre order with trackId: '
                 order.save()
 
                 foods = info['foods']
@@ -629,8 +633,8 @@ def insert_user_order(request):
 
                 notif_to_admin(
                     orderId=order.order_id,
-                    title='order',
-                    message='you have a order with trackId: ' + str(order.track_id),
+                    title=title,
+                    message=mess + str(order.track_id),
                     is_pre_order=is_pre,
                     delivery_date=del_datetime.split(' ')[0],
                 )
@@ -872,6 +876,10 @@ def ticket(request):
 def notif_to_admin(**kwargs):
     admins_notif = Device.objects.filter(name='appAdmin')
     data = {
+        'orderId': kwargs['orderId'],
+        'click_action': 'FLUTTER_NOTIFICATION_CLICK',
+    }
+    notif = {
         'title': kwargs['title'],
         'body': kwargs['message'],
         'click_action': 'FLUTTER_NOTIFICATION_CLICK',
@@ -882,6 +890,10 @@ def notif_to_admin(**kwargs):
         if kwargs['is_pre_order']:
             st = RestaurantTime.objects.first()
             t = t + ' ' + str(st.start)
+            notif.update({
+                'isScheduled': 'true',
+                'scheduledTime': t,
+            })
             data.update({
                 'isScheduled': 'true',
                 'scheduledTime': t,
@@ -889,11 +901,8 @@ def notif_to_admin(**kwargs):
 
     for an in admins_notif:
         an.send_message(
-            {
-                'orderId': kwargs['orderId'],
-                'click_action': 'FLUTTER_NOTIFICATION_CLICK',
-            },
-            notification=data
+            data,
+            notification=notif
         )
 
 
