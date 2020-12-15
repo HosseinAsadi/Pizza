@@ -221,7 +221,7 @@ def password_reminder(request):
         if user.exists():
             mail_content = 'your password: ' + user[0].password + ' for pizza app'
             sender_gmail = 'pizzariaamicos@gmail.com'
-            sender_pass = 'Cisco2020'
+            sender_pass = 'C@lif0rnia2030'
             message = MIMEMultipart()
             message['From'] = sender_gmail
             message['To'] = e
@@ -259,7 +259,7 @@ def my_send_mail(request):
             otp = str(otp)
             mail_content = 'confirmation code: ' + otp + ' for pizza app'
             sender_gmail = 'pizzariaamicos@gmail.com'
-            sender_pass = 'Cisco2020'
+            sender_pass = 'C@lif0rnia2030'
             message = MIMEMultipart()
             message['From'] = sender_gmail
             message['To'] = receiver_email
@@ -890,19 +890,16 @@ def notif_to_admin(**kwargs):
         if kwargs['is_pre_order']:
             st = RestaurantTime.objects.first()
             t = t + ' ' + str(st.start)
-            notif.update({
-                'isScheduled': 'true',
-                'scheduledTime': t,
-            })
             data.update({
-                'isScheduled': 'true',
+                'isScheduled': True,
                 'scheduledTime': t,
             })
 
     for an in admins_notif:
         an.send_message(
             data,
-            notification=notif
+            notification=notif,
+            priority="high"
         )
 
 
