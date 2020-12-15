@@ -626,12 +626,13 @@ def insert_user_order(request):
                 for o in options:
                     of = OrderFood(food_size_id=o['optionSizeId'], order=order, number=o['number'])
                     of.save()
-
+                del_datetime = order.delivery_datetime
                 notif_to_admin(
                     orderId=order.order_id,
                     title='order',
                     message='you have a order with trackId: ' + str(order.track_id),
                     is_pre_order=is_pre,
+                    delivery_date=del_datetime.date(),
                 )
                 return my_response(True, 'success', order.to_json())
             else:
@@ -877,9 +878,9 @@ def notif_to_admin(**kwargs):
         "sound": "default",
     }
     if 'is_pre_order' in kwargs:
+        t = kwargs['delivery_date']
         if kwargs['is_pre_order']:
             st = RestaurantTime.objects.first()
-            t = datetime.date.today()
 
             t = str(t) + ' ' + str(st.start)
             data.update({
