@@ -357,8 +357,6 @@ def get_home_info(request):
                         else:
                             child_list.append(c.to_json())
 
-                child_list.insert(0, child_list.pop())
-
                 group_with_children.append(g.to_json(child_list))
 
             # if rate number changed go to update food group api and change that
@@ -366,6 +364,7 @@ def get_home_info(request):
             foods = list(Food.objects.filter(rank__gt=4, status=True).order_by('rank'))
             popular_list = merge(foods, options, fav_option, fav_food)
 
+            group_with_children.insert(0, group_with_children.pop())
             context = {
                 'childrenWithGroup': group_with_children,
                 'popularFoods': popular_list,
