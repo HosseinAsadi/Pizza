@@ -636,7 +636,7 @@ def insert_user_order(request):
                     t = del_datetime.split(' ')[0] + ' ' + str(st.start)
                     date_time_obj = datetime.datetime.strptime(t, '%Y-%m-%d %H:%M:%S')
                     notif_to_admin_in_background(
-                        schedule=date_time_obj,
+                        schedule=st.start,
                         orderId=order.order_id,
                         title=title,
                         message=mess + str(order.track_id),
