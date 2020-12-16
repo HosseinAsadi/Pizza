@@ -388,7 +388,7 @@ def food(request, food_id=None):
     token = Token.objects.filter(token=token)
     if token.exists() and token[0].is_admin:
         if request.method == 'POST' or request.method == 'PUT':
-            try:
+            # try:
                 info = loads(request.body.decode('utf-8'))
                 name = info['name']
                 describe = info['description']
@@ -458,9 +458,14 @@ def food(request, food_id=None):
                     if 'doubleOptions' in info:
                         dp = info['doubleOptions']
                         if dp is not None:
-                            double_op = DoubleOptions.objects.filter(id=dp['doubleOptionsId'])
-                            double_op.update(name1=dp['name1'], name2=dp['name2'], options_extra_price=dp['optionsExtraPrice'])
-                            double_op = double_op[0]
+                            if dp['doubleOptionsId'] is not None:
+                                double_op = DoubleOptions.objects.filter(id=dp['doubleOptionsId'])
+                                double_op.update(name1=dp['name1'], name2=dp['name2'], options_extra_price=dp['optionsExtraPrice'])
+                                double_op = double_op[0]
+                            else:
+                                double_op = DoubleOptions(name1=dp['name1'], name2=dp['name2'],
+                                                          options_extra_price=dp['optionsExtraPrice'])
+                                double_op.save()
 
                     f = Food.objects.filter(food_id=food_id)
                     f.update(
@@ -483,8 +488,8 @@ def food(request, food_id=None):
                     FoodOption(food=f, option_size=op).save()
 
                 return my_response(True, 'success', f.to_json())
-            except Exception as e:
-                return my_response(False, 'error in food, check send body, ' + str(e), {})
+            # except Exception as e:
+            #     return my_response(False, 'error in food, check send body, ' + str(e), {})
         elif request.method == 'DELETE':
             var = Food.objects.filter(food_id=food_id).delete()
             if var[0] != 0:
