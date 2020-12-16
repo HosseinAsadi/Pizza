@@ -1,24 +1,19 @@
 import datetime
-import base64
 import random
 from json import loads
 import hashlib
-
 from api import admin
 from api.models import User, Group, Food, FoodSize, Token, Favorite, Order, Option, Address, \
     OrderOption, RestaurantInfo, RestaurantTime, OrderFood, FoodOption, FoodType, RestaurantAddress, Ticket, Otp, \
     Payment, OrderType, OptionType
 from django.http import JsonResponse, HttpResponse
 from django.views.decorators.csrf import csrf_exempt
-from django.utils.crypto import get_random_string
-from django.core.paginator import Paginator
 from fcm.models import *
 import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from django.utils.crypto import get_random_string
 from api.pay import *
-
 
 def my_response(status, message, data):
     return JsonResponse({
@@ -638,6 +633,7 @@ def insert_user_order(request):
                     is_pre_order=is_pre,
                     delivery_date=del_datetime.split(' ')[0],
                 )
+
                 return my_response(True, 'success', order.to_json())
             else:
                 return my_response(False, 'invalid token', {})
@@ -885,6 +881,7 @@ def notif_to_admin(**kwargs):
         'click_action': 'FLUTTER_NOTIFICATION_CLICK',
         "sound": "default",
     }
+
     if 'is_pre_order' in kwargs:
         t = kwargs['delivery_date']
         if kwargs['is_pre_order']:
@@ -903,7 +900,6 @@ def notif_to_admin(**kwargs):
         an.send_message(
             data,
             notification=notif,
-            priority="high"
         )
 
 
