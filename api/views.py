@@ -5,6 +5,7 @@ import hashlib
 
 from background_task import background
 from background_task.models import Task
+from django.utils import timezone
 
 from api import admin
 from api.models import User, Group, Food, FoodSize, Token, Favorite, Order, Option, Address, \
@@ -32,8 +33,8 @@ def my_response(status, message, data):
 def base(request):
     # Device.objects.filter(name='appAdmin').delete()
     # Device(name='test',
-    #        reg_id='dgoUA-AXTlSPMBWssTvE2W:APA91bFLk03xgF9XetiA7D3idLy2UZULbcGiudyqpK3PE5AwZtR19VmnaBnXfIcGb2Fd59XtNUCjKvVs5S8ROlO0lKHTqBmteyMhICholU13turuq0VUpic3Q1rjbfOeEmfN_cxKKoqx',
-    #        dev_id='1af09455bf22d117', is_active=True).save()
+    #        reg_id='eWx07pYiQTSrItcVoHh3yb:APA91bG2IMOuoF0b0V1oFyVskK5R6G1CgsNKSr2jNPiNbeILRIsW14qYTvAKdvDJ6UWU93kAzyhB_-LBfBW5TojTcS47Gbx34wRcuZ31xfAyifwubUWELnfk2qEVQikfS5vczm2b1AVw',
+    #        dev_id='6097c81d1b183c55', is_active=True).save()
 
     # print(Device.objects.get(name='test').send_message({'ss':"ss"}))
     return HttpResponse(content='<p1>this is server api for pizza project</p1>')
@@ -636,7 +637,7 @@ def insert_user_order(request):
                     t = del_datetime.split(' ')[0] + ' ' + str(st.start)
                     date_time_obj = datetime.datetime.strptime(t, '%Y-%m-%d %H:%M:%S')
                     notif_to_admin_in_background(
-                        schedule=st.start,
+                        schedule=date_time_obj.astimezone(),
                         orderId=order.order_id,
                         title=title,
                         message=mess + str(order.track_id),
@@ -883,7 +884,7 @@ def ticket(request):
         return my_response(False, 'token invalid', {})
 
 
-@background(schedule=10)
+@background(schedule=10, queue='my-queue')
 def notif_to_admin_in_background(**kwargs):
     admins_notif = Device.objects.filter(name='appAdmin')
     data = {
