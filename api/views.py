@@ -2,6 +2,10 @@ import datetime
 import random
 from json import loads
 import hashlib
+
+from background_task import background
+from background_task.models import Task
+
 from api import admin
 from api.models import User, Group, Food, FoodSize, Token, Favorite, Order, Option, Address, \
     OrderOption, RestaurantInfo, RestaurantTime, OrderFood, FoodOption, FoodType, RestaurantAddress, Ticket, Otp, \
@@ -14,6 +18,7 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from django.utils.crypto import get_random_string
 from api.pay import *
+
 
 def my_response(status, message, data):
     return JsonResponse({
@@ -597,13 +602,9 @@ def insert_user_order(request):
                     payment_type=pay_type,
                     is_pre_order=is_pre,
                 )
-                title = 'order'
-                mess = 'you have a order with trackId: '
                 if is_pre:
                     order.completed = True
                     order.status = True
-                    title = 'pre order'
-                    mess = 'you have a pre order with trackId: '
                 order.save()
 
                 foods = info['foods']
@@ -626,13 +627,26 @@ def insert_user_order(request):
                     of = OrderFood(food_size_id=o['optionSizeId'], order=order, number=o['number'])
                     of.save()
 
-                notif_to_admin(
-                    orderId=order.order_id,
-                    title=title,
-                    message=mess + str(order.track_id),
-                    is_pre_order=is_pre,
-                    delivery_date=del_datetime.split(' ')[0],
-                )
+                title = 'order'
+                mess = 'you have a order with trackId: '
+                if is_pre:
+                    title = 'pre order'
+                    mess = 'you have a pre order with trackId: '
+                    st = RestaurantTime.objects.first()
+                    t = del_datetime.split(' ')[0] + ' ' + str(st.start)
+                    date_time_obj = datetime.datetime.strptime(t, '%Y-%m-%d %H:%M:%S')
+                    notif_to_admin_in_background(
+                        schedule=date_time_obj,
+                        orderId=order.order_id,
+                        title=title,
+                        message=mess + str(order.track_id),
+                    )
+                else:
+                    notif_to_admin(
+                        orderId=order.order_id,
+                        title=title,
+                        message=mess + str(order.track_id),
+                    )
 
                 return my_response(True, 'success', order.to_json())
             else:
@@ -869,7 +883,8 @@ def ticket(request):
         return my_response(False, 'token invalid', {})
 
 
-def notif_to_admin(**kwargs):
+@background(schedule=10)
+def notif_to_admin_in_background(**kwargs):
     admins_notif = Device.objects.filter(name='appAdmin')
     data = {
         'orderId': kwargs['orderId'],
@@ -882,19 +897,25 @@ def notif_to_admin(**kwargs):
         "sound": "default",
     }
 
-    if 'is_pre_order' in kwargs:
-        t = kwargs['delivery_date']
-        if kwargs['is_pre_order']:
-            st = RestaurantTime.objects.first()
-            t = t + ' ' + str(st.start)
-            notif.update({
-                'isScheduled': True,
-                'scheduledTime': t,
-            })
-            data.update({
-                'isScheduled': True,
-                'scheduledTime': t,
-            })
+    for an in admins_notif:
+        an.send_message(
+            data,
+            notification=notif,
+        )
+
+
+def notif_to_admin(**kwargs):
+    admins_notif = Device.objects.filter(name='appAdmin')
+    data = {
+        'orderId': kwargs['orderId'],
+        'click_action': 'FLUTTER_NOTIFICATION_CLICK',
+    }
+    notif = {
+        'title': kwargs['title'],
+        'body': kwargs['message'],
+        'click_action': 'FLUTTER_NOTIFICATION_CLICK',
+        "sound": "default",
+    }
 
     for an in admins_notif:
         an.send_message(
