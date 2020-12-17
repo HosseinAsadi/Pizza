@@ -43,7 +43,7 @@ def pay(info):
     body = {
         "transaction": {
             "currency": "GBP",
-            "amount": info['pan'],
+            "amount": info['amount'],
             "description": "",
             "commerceType": "MOTO",
             "channel": "MOBILE"
