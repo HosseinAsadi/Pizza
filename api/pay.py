@@ -84,4 +84,4 @@ def pay(info):
     if r.status_code == 200:
         return r.json()
     else:
-        return r
+        return r.json()
