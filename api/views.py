@@ -588,7 +588,6 @@ def insert_user_order(request):
                 delivery_cost = info['deliveryCost']
                 pay_type = info['paymentType']
                 is_pre = info['isPreOrder']
-                trans_id = info['transactionId']
                 tr_id = random.randint(100000, 100000000)
                 order = Order(
                     user=user,
@@ -653,7 +652,9 @@ def insert_user_order(request):
                         message=mess + str(order.track_id),
                     )
 
-                Payment.objects.filter(trans_id=trans_id).update(order=order)
+                if 'transactionId' in info:
+                    trans_id = info['transactionId']
+                    Payment.objects.filter(trans_id=trans_id).update(order=order)
 
                 return my_response(True, 'success', order.to_json())
             else:
