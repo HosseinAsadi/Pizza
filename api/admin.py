@@ -34,6 +34,7 @@ admin.site.register(RestaurantTime)
 admin.site.register(Otp)
 admin.site.register(PostCode)
 admin.site.register(OptionType)
+admin.site.register(Payment)
 
 
 @csrf_exempt
