@@ -1,3 +1,5 @@
+import json
+
 import requests
 import base64
 
@@ -80,8 +82,8 @@ def pay(info):
     auth = base64.b64encode(auth.encode('utf-8'))
     auth = str(auth, 'utf-8')
     auth = "Basic {}".format(auth)
-    r = requests.post(url, data=body, headers={"authorization": auth, 'Content-Type': 'application/json'})
-    if r.status_code == 200:
+    r = requests.post(url, data=json.dumps(body), headers={"Authorization": auth, 'Content-Type': 'application/json'})
+    if r.status_code == 200 or r.status_code == 400:
         return r.json()
     else:
         return None

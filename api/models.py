@@ -516,7 +516,7 @@ class Payment(models.Model):
     trans_time = models.DateTimeField()
 
     def to_json(self):
-        return {
+        context = {
             'paymentId': self.id,
             'user': self.user.to_json(),
             'transactionId': self.trans_id,
@@ -524,6 +524,10 @@ class Payment(models.Model):
             'amount': self.amount,
             'transactionTime': self.trans_time,
         }
+        if self.order is not None:
+            context.update({'order': self.order.to_json(with_detail=False)})
+
+        return context
 
 
 class Ticket(models.Model):

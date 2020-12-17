@@ -588,6 +588,7 @@ def insert_user_order(request):
                 delivery_cost = info['deliveryCost']
                 pay_type = info['paymentType']
                 is_pre = info['isPreOrder']
+                trans_id = info['transactionId']
                 tr_id = random.randint(100000, 100000000)
                 order = Order(
                     user=user,
@@ -607,6 +608,8 @@ def insert_user_order(request):
                 if is_pre:
                     order.completed = True
                     order.status = True
+                else:
+                    order.completed = True
                 order.save()
 
                 foods = info['foods']
@@ -649,6 +652,8 @@ def insert_user_order(request):
                         title=title,
                         message=mess + str(order.track_id),
                     )
+
+                Payment.objects.filter(trans_id=trans_id).update(order=order)
 
                 return my_response(True, 'success', order.to_json())
             else:
@@ -695,18 +700,18 @@ def order_payment(request):
             try:
                 info = loads(request.body.decode('utf-8'))
                 info = pay(info)
+                #o_id = info['orderId']
                 if info is None:
                     return my_response(False, 'Problem with payment operations, please try again later. ', {})
                 user = token[0].user
-                o_id = info['orderId']
-                trans_id = info['transactionId']
-                trans_time = info['transactionTime']
-                st = info['status']
-                amount = info['amount']
+                trans_id = info['transaction']['transactionId']
+                trans_time = info['transaction']['transactionTime']
+                st = info['transaction']['status']
+                amount = info['transaction']['amount']
 
                 payment = Payment(
                     user=user,
-                    order_id=o_id,
+                    #order_id=o_id,
                     trans_id=trans_id,
                     status=st,
                     amount=amount,
@@ -714,18 +719,18 @@ def order_payment(request):
                 )
                 payment.save()
 
-                if st == 'FAILED':
-                    return my_response(False, 'transaction failed', payment.to_json())
-                else:
-                    o = Order.objects.filter(order_id=o_id)
-                    o.update(completed=True)
-                    o = o.first()
-                    notif_to_admin(
-                        orderId=o_id,
-                        title='order payment',
-                        message='user paid for his order with trackId: ' + str(o.track_id)
-                    )
-                    return my_response(True, 'success', payment.to_json())
+                #if st == 'FAILED':
+                    #return my_response(False, 'transaction failed', payment.to_json())
+                #else:
+#                    o = Order.objects.filter(order_id=o_id)
+#                    o.update(completed=True)
+#                    o = o.first()
+#                    notif_to_admin(
+#                        orderId=o_id,
+#                        title='order payment',
+#                        message='user paid for his order with trackId: ' + str(o.track_id)
+#                    )
+                return my_response(True, info['outcome']['reasonMessage'], payment.to_json())
 
             except Exception as e:
                 return my_response(False, 'error in payment order, check body send, ' + str(e), {})
