@@ -695,8 +695,9 @@ def order_payment(request):
             try:
                 info = loads(request.body.decode('utf-8'))
                 info = pay(info)
+                return my_response(False, 'Problem with payment operations, please try again later. ' + info, {})
                 if info is None:
-                    return my_response(False, 'Problem with payment operations, please try again later', {})
+                    return my_response(False, 'Problem with payment operations, please try again later. ', {})
                 user = token[0].user
                 o_id = info['orderId']
                 trans_id = info['transactionId']
