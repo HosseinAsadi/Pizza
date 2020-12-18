@@ -64,7 +64,10 @@ def pay_level1(info):
                 "defaultCard": "false"
             },
             "billingAddress": {
+                "line1": info['line1'],
+                "line2": info['line2'],
                 "city": info['city'],
+                "region": info['region'],
                 "postcode": info['postcode'],
                 "countryCode": info['countryCode']
             }
