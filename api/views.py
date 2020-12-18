@@ -651,7 +651,7 @@ def insert_user_order(request):
 
                 if 'transactionId' in info:
                     trans_id = info['transactionId']
-                    Payment.objects.filter(trans_id=trans_id).update(order=order)
+                    Payment.objects.filter(trans_id=trans_id).update(order=order, status='SUCCESS')
 
                 return my_response(True, 'success', order.to_json())
             else:
@@ -698,8 +698,8 @@ def request_payment_url(request):
             try:
                 info = loads(request.body.decode('utf-8'))
                 info = pay_level1(info)
-                if info is None:
-                    return my_response(False, 'Problem with payment operations, please try later. ', {})
+                if info is str:
+                    return my_response(False, info, {})
                 user = token[0].user
                 payment = Payment(
                     user=user,
@@ -712,7 +712,7 @@ def request_payment_url(request):
                 return my_response(True, 'success', info)
 
             except Exception as e:
-                return my_response(False, 'error in request_payment_url, please try later, ' + str(e), {})
+                return my_response(False, 'error in request_payment_url, Problem with payment operations, please try later.', {})
         else:
             return my_response(False, 'invalid method', {})
     else:
@@ -721,66 +721,60 @@ def request_payment_url(request):
 
 @csrf_exempt
 def order_payment(request):
-    # token = request.headers.get('token')
-    # token = Token.objects.filter(token=token)
-    # if token.exists():
     if request.method == 'POST':
         try:
-
-            context = {
-                'MD': request.POST.get('MD'),
-                'PaRes': request.POST.get('PaRes')
-            }
             info = pay_level2(request)
-            if info is not None:
-
-                return my_response(True, 'success', info)
+            if info is str:
+                return my_response(False, info, info)
             else:
-                return my_response(True, 'success 401 or else', {})
+                return my_response(True, 'success', info)
 
-                # if info is None:
-                #     return my_response(False, 'Problem with payment operations, please try again later. ', {})
-                # user = token[0].user
-                # trans_id = info['transaction']['transactionId']
-                # trans_time = info['transaction']['transactionTime']
-                # st = info['transaction']['status']
-                # amount = info['transaction']['amount']
+#                 if info is None:
+#                     return my_response(False, 'Problem with payment operations, please try again later. ', {})
+#                 user = token[0].user
+#                 trans_id = info['transaction']['transactionId']
+#                 trans_time = info['transaction']['transactionTime']
+#                 st = info['transaction']['status']
+#                 amount = info['transaction']['amount']
 
-                # payment = Payment(
-                #     user=user,
-                #     trans_id=trans_id,
-                #     status=st,
-                #     amount=amount,
-                #     trans_time=trans_time
-                # )
-                # payment.save()
+#                 payment = Payment(
+#                     user=user,
+#                     trans_id=trans_id,
+#                     status=st,
+#                     amount=amount,
+#                     trans_time=trans_time
+#                 )
+#                 payment.save()
 
-                #if st == 'FAILED':
-                    #return my_response(False, 'transaction failed', payment.to_json())
-                #else:
-#                    o = Order.objects.filter(order_id=o_id)
-#                    o.update(completed=True)
-#                    o = o.first()
-#                    notif_to_admin(
-#                        orderId=o_id,
-#                        title='order payment',
-#                        message='user paid for his order with trackId: ' + str(o.track_id)
-#                    )
+#                 if st == 'FAILED':
+#                 return my_response(False, 'transaction failed', payment.to_json())
+#                   else:
+#                           o = Order.objects.filter(order_id=o_id)
+#                           o.update(completed=True)
+#                           o = o.first()
+#                           notif_to_admin(
+#                               orderId=o_id,
+#                               title='order payment',
+#                               message='user paid for his order with trackId: ' + str(o.track_id)
+#                           )
         except Exception as e:
-            return my_response(False, 'error in payment order, check body send, ' + str(e), {})
-        # elif request.method == 'GET':
-        #     if token[0].is_admin:
-        #         pays = Payment.objects.all()
-        #     else:
-        #         pays = Payment.objects.filter(user=token[0].user)
-        #     _list = []
-        #     for p in pays:
-        #         _list.append(p.to_json())
-        #     return my_response(True, 'success', _list)
-        # else:
-        #     return my_response(False, 'invalid method', {})
-    # else:
-    #     return my_response(False, 'token not exist', {})
+            return my_response(False, 'error in payment order, Problem with payment operations, please try later.', {})
+    elif request.method == 'GET':
+        token = request.headers.get('token')
+        token = Token.objects.filter(token=token)
+        if token.exists():
+            if token[0].is_admin:
+                pays = Payment.objects.all()
+            else:
+                pays = Payment.objects.filter(user=token[0].user)
+            _list = []
+            for p in pays:
+                _list.append(p.to_json())
+            return my_response(True, 'success', _list)
+        else:
+            return my_response(False, 'token not exist', {})
+    else:
+        return my_response(False, 'invalid method', {})
 
 
 @csrf_exempt
