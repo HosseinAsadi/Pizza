@@ -699,7 +699,7 @@ def request_payment_url(request):
                 info = loads(request.body.decode('utf-8'))
                 info = pay_level1(info)
                 if info is None:
-                    return my_response(False, 'Problem with payment operations, please try again later. ', {})
+                    return my_response(False, 'Problem with payment operations, please try later. ', {})
                 user = token[0].user
                 payment = Payment(
                     user=user,
@@ -712,7 +712,7 @@ def request_payment_url(request):
                 return my_response(True, 'success', info)
 
             except Exception as e:
-                return my_response(False, 'error in request_payment_url, please try again later, ' + str(e), {})
+                return my_response(False, 'error in request_payment_url, please try later, ' + str(e), {})
         else:
             return my_response(False, 'invalid method', {})
     else:
@@ -727,6 +727,8 @@ def order_payment(request):
         if request.method == 'POST':
             try:
                 info = loads(request.body.decode('utf-8'))
+
+                print(info)
                 # info = pay_level2(info)
                 # if info is None:
                 #     return my_response(False, 'Problem with payment operations, please try again later. ', {})

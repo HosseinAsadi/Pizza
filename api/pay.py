@@ -82,9 +82,6 @@ def pay_level1(info):
     auth = "Basic {}".format(auth)
     r = requests.post(url, data=json.dumps(body), headers={"Authorization": auth, 'Content-Type': 'application/json'})
 
-    print(r.status_code)
-    print(r.json())
-
     if r.status_code == 201:
         res_json = r.json()
         if res_json['outcome']['status'] == 'SUCCESS':
@@ -103,15 +100,12 @@ def pay_level2(info):
     body = {
         "threeDSecureResponse": {"pares": info['pares']}
     }
-    url = 'https://api.pay360.com/acceptor/rest/transactions/8000738/11090972261/resume'
+    url = 'https://api.pay360.com/acceptor/rest/transactions/8000738/{transId}/resume'
     auth = 'MP5WS5KVRVAEFLXEUPU7WBW6FA:Nq+5LnRY0IVSTSdtdj7GdQ=='
     auth = base64.b64encode(auth.encode('utf-8'))
     auth = str(auth, 'utf-8')
     auth = "Basic {}".format(auth)
     r = requests.post(url, data=json.dumps(body), headers={"Authorization": auth, 'Content-Type': 'application/json'})
-
-    print(r.status_code)
-    print(r.json())
 
     if r.status_code == 200 or r.status_code == 400:
         return r.json()
