@@ -3,6 +3,8 @@ import json
 import requests
 import base64
 
+from django.utils.crypto import get_random_string
+
 '''
     {
         "transaction": {
@@ -41,13 +43,15 @@ import base64
 '''
 
 
-def pay(info):
+def pay_level1(info):
+    merchant_ref = get_random_string(32)
     body = {
         "transaction": {
             "currency": "GBP",
             "amount": info['amount'],
             "description": "",
-            "commerceType": "MOTO",
+            "commerceType": "ECOM",
+            "merchantRef": merchant_ref,
             "channel": "MOBILE"
         },
         "paymentMethod": {
@@ -56,7 +60,6 @@ def pay(info):
                 "cv2": info['cv2'],
                 "expiryDate": info['expiryDate'],
                 "cardType": info['cardType'],
-                "nickname": info['nickname'],
                 "cardHolderName": info['cardHolderName'],
                 "defaultCard": "false"
             },
@@ -67,13 +70,7 @@ def pay(info):
             }
         },
         "customer": {
-            "merchantRef": info['merchantRef'],
-            "displayName": info['displayName'],
-            "billingAddress": {
-                "city": info['city'],
-                "postcode": info['postcode'],
-                "countryCode": info['countryCode']
-            }
+            "registered": False
         }
     }
 
@@ -83,6 +80,38 @@ def pay(info):
     auth = str(auth, 'utf-8')
     auth = "Basic {}".format(auth)
     r = requests.post(url, data=json.dumps(body), headers={"Authorization": auth, 'Content-Type': 'application/json'})
+
+    print(r.status_code)
+    print(r.json())
+
+    if r.status_code == 201:
+        res_json = r.json()
+        if res_json['outcome']['status'] == 'SUCCESS':
+            return {
+                'url': res_json['clientRedirect']['url'],
+                'pareq': res_json['clientRedirect']['pareq'],
+                'transaction': res_json['transaction']
+            }
+        else:
+            return None
+    else:
+        return None
+
+
+def pay_level2(info):
+    body = {
+        "threeDSecureResponse": {"pares": info['pares']}
+    }
+    url = 'https://api.pay360.com/acceptor/rest/transactions/8000738/11090972261/resume'
+    auth = 'MP5WS5KVRVAEFLXEUPU7WBW6FA:Nq+5LnRY0IVSTSdtdj7GdQ=='
+    auth = base64.b64encode(auth.encode('utf-8'))
+    auth = str(auth, 'utf-8')
+    auth = "Basic {}".format(auth)
+    r = requests.post(url, data=json.dumps(body), headers={"Authorization": auth, 'Content-Type': 'application/json'})
+
+    print(r.status_code)
+    print(r.json())
+
     if r.status_code == 200 or r.status_code == 400:
         return r.json()
     else:

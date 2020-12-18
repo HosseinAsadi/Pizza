@@ -28,6 +28,7 @@ urlpatterns = [
     path('getOrder/', views.get_orders, ),
     path('insertOrder/', views.insert_user_order),
     path('setRate/', views.set_food_rate),
+    path('requestPayUrl/', views.request_payment_url),
     path('orderPayment/', views.order_payment),
     path('search/', views.search_food),
     path('filter/', views.filter_food),

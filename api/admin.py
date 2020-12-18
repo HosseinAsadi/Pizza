@@ -402,6 +402,7 @@ def food(request, food_id=None):
                 sizes = info['sizes']
                 types = info['types']
                 ops = info['options']
+                dp = info['doubleOptions']
                 o_types = info['optionTypes']
                 double_op = None
 
@@ -417,11 +418,9 @@ def food(request, food_id=None):
 
                 if request.method == 'POST':
                     group_id = info['groupId']
-                    if 'doubleOptions' in info:
-                        dp = info['doubleOptions']
-                        if dp is not None:
-                            double_op = DoubleOptions(name1=dp['name1'], name2=dp['name2'], options_extra_price=dp['optionsExtraPrice'])
-                            double_op.save()
+                    if dp is not None:
+                        double_op = DoubleOptions(name1=dp['name1'], name2=dp['name2'], options_extra_price=dp['optionsExtraPrice'])
+                        double_op.save()
 
                     f = Food(
                         group_id=group_id,
@@ -456,19 +455,20 @@ def food(request, food_id=None):
                         for t in ot['children']:
                             FoodType(food=f, type=t['type'], price=t['price'], option_type=op_t).save()
                 else:
-                    if 'doubleOptions' in info:
-                        dp = info['doubleOptions']
-                        if dp is not None:
-                            if dp['doubleOptionsId'] is not None:
-                                double_op = DoubleOptions.objects.filter(id=dp['doubleOptionsId'])
-                                double_op.update(name1=dp['name1'], name2=dp['name2'], options_extra_price=dp['optionsExtraPrice'])
-                                double_op = double_op[0]
-                            else:
-                                double_op = DoubleOptions(name1=dp['name1'], name2=dp['name2'],
-                                                          options_extra_price=dp['optionsExtraPrice'])
-                                double_op.save()
-
                     f = Food.objects.filter(food_id=food_id)
+                    if dp is not None:
+                        if dp['doubleOptionsId'] is not None:
+                            double_op = DoubleOptions.objects.filter(id=dp['doubleOptionsId'])
+                            double_op.update(name1=dp['name1'], name2=dp['name2'], options_extra_price=dp['optionsExtraPrice'])
+                            double_op = double_op[0]
+                        else:
+                            double_op = DoubleOptions(name1=dp['name1'], name2=dp['name2'],
+                                                      options_extra_price=dp['optionsExtraPrice'])
+                            double_op.save()
+                    else:
+                        if f[0].double_options is not None:
+                            DoubleOptions.objects.filter(id= f[0].double_options.id).delete()
+
                     f.update(
                         name=name,
                         description=describe,

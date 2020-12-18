@@ -4,9 +4,6 @@ from json import loads
 import hashlib
 
 from background_task import background
-from background_task.models import Task
-from django.utils import timezone
-
 from api import admin
 from api.models import User, Group, Food, FoodSize, Token, Favorite, Order, Option, Address, \
     OrderOption, RestaurantInfo, RestaurantTime, OrderFood, FoodOption, FoodType, RestaurantAddress, Ticket, Otp, \
@@ -693,6 +690,36 @@ def get_orders(request):
 
 
 @csrf_exempt
+def request_payment_url(request):
+    token = request.headers.get('token')
+    token = Token.objects.filter(token=token)
+    if token.exists():
+        if request.method == 'POST':
+            try:
+                info = loads(request.body.decode('utf-8'))
+                info = pay_level1(info)
+                if info is None:
+                    return my_response(False, 'Problem with payment operations, please try again later. ', {})
+                user = token[0].user
+                payment = Payment(
+                    user=user,
+                    trans_id=info['transaction']['transactionId'],
+                    status='PENDING',
+                    amount=info['transaction']['amount'],
+                    trans_time=info['transaction']['transactionTime']
+                )
+                payment.save()
+                return my_response(True, 'success', info)
+
+            except Exception as e:
+                return my_response(False, 'error in request_payment_url, please try again later, ' + str(e), {})
+        else:
+            return my_response(False, 'invalid method', {})
+    else:
+        return my_response(False, 'token not exist', {})
+
+
+@csrf_exempt
 def order_payment(request):
     token = request.headers.get('token')
     token = Token.objects.filter(token=token)
@@ -700,25 +727,23 @@ def order_payment(request):
         if request.method == 'POST':
             try:
                 info = loads(request.body.decode('utf-8'))
-                info = pay(info)
-                #o_id = info['orderId']
-                if info is None:
-                    return my_response(False, 'Problem with payment operations, please try again later. ', {})
-                user = token[0].user
-                trans_id = info['transaction']['transactionId']
-                trans_time = info['transaction']['transactionTime']
-                st = info['transaction']['status']
-                amount = info['transaction']['amount']
+                # info = pay_level2(info)
+                # if info is None:
+                #     return my_response(False, 'Problem with payment operations, please try again later. ', {})
+                # user = token[0].user
+                # trans_id = info['transaction']['transactionId']
+                # trans_time = info['transaction']['transactionTime']
+                # st = info['transaction']['status']
+                # amount = info['transaction']['amount']
 
-                payment = Payment(
-                    user=user,
-                    #order_id=o_id,
-                    trans_id=trans_id,
-                    status=st,
-                    amount=amount,
-                    trans_time=trans_time
-                )
-                payment.save()
+                # payment = Payment(
+                #     user=user,
+                #     trans_id=trans_id,
+                #     status=st,
+                #     amount=amount,
+                #     trans_time=trans_time
+                # )
+                # payment.save()
 
                 #if st == 'FAILED':
                     #return my_response(False, 'transaction failed', payment.to_json())
@@ -731,7 +756,7 @@ def order_payment(request):
 #                        title='order payment',
 #                        message='user paid for his order with trackId: ' + str(o.track_id)
 #                    )
-                return my_response(True, info['outcome']['reasonMessage'], payment.to_json())
+                return my_response(True, 'success', info)
 
             except Exception as e:
                 return my_response(False, 'error in payment order, check body send, ' + str(e), {})
