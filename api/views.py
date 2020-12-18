@@ -726,9 +726,13 @@ def order_payment(request):
     # if token.exists():
     if request.method == 'POST':
         try:
-            return my_response(True, 'success', request.body)
             info = loads(request.body.decode('utf-8'))
-            print(info)
+
+            context = {
+                'MD': info['MD'],
+                'PaRes': info['PaRes']
+            }
+
             return my_response(True, 'success', info)
                 # info = pay_level2(info)
                 # if info is None:
@@ -760,7 +764,7 @@ def order_payment(request):
 #                        message='user paid for his order with trackId: ' + str(o.track_id)
 #                    )
         except Exception as e:
-            return my_response(False, 'error in payment order, check body send, ' + str(e) + str(request.body), {})
+            return my_response(False, 'error in payment order, check body send, ' + str(e) + str(request.body.decode('utf-8')), {})
         # elif request.method == 'GET':
         #     if token[0].is_admin:
         #         pays = Payment.objects.all()
