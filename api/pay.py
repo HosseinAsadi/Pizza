@@ -100,7 +100,7 @@ def pay_level2(request):
     body = {
         "threeDSecureResponse": {"pares": request.POST.get('PaRes')}
     }
-    url = 'https://api.pay360.com/acceptor/rest/transactions/8000738/'+request.POST.get('MD')+'/resume'
+    url = 'https://api.pay360.com/acceptor/rest/transactions/8000738/'+str(request.POST.get('MD'))+'/resume'
     auth = 'MP5WS5KVRVAEFLXEUPU7WBW6FA:Nq+5LnRY0IVSTSdtdj7GdQ=='
     auth = base64.b64encode(auth.encode('utf-8'))
     auth = str(auth, 'utf-8')
