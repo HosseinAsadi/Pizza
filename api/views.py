@@ -721,14 +721,13 @@ def request_payment_url(request):
 
 @csrf_exempt
 def order_payment(request):
-    token = request.headers.get('token')
-    token = Token.objects.filter(token=token)
-    if token.exists():
-        if request.method == 'POST':
-            try:
-                info = loads(request.body.decode('utf-8'))
-
-                print(info)
+    # token = request.headers.get('token')
+    # token = Token.objects.filter(token=token)
+    # if token.exists():
+    if request.method == 'POST':
+        try:
+            info = loads(request.body.decode('utf-8'))
+            print(info)
                 # info = pay_level2(info)
                 # if info is None:
                 #     return my_response(False, 'Problem with payment operations, please try again later. ', {})
@@ -758,23 +757,22 @@ def order_payment(request):
 #                        title='order payment',
 #                        message='user paid for his order with trackId: ' + str(o.track_id)
 #                    )
-                return my_response(True, 'success', info)
-
-            except Exception as e:
-                return my_response(False, 'error in payment order, check body send, ' + str(e), {})
-        elif request.method == 'GET':
-            if token[0].is_admin:
-                pays = Payment.objects.all()
-            else:
-                pays = Payment.objects.filter(user=token[0].user)
-            _list = []
-            for p in pays:
-                _list.append(p.to_json())
-            return my_response(True, 'success', _list)
-        else:
-            return my_response(False, 'invalid method', {})
-    else:
-        return my_response(False, 'token not exist', {})
+            return my_response(True, 'success', info)
+        except Exception as e:
+            return my_response(False, 'error in payment order, check body send, ' + str(e), {})
+        # elif request.method == 'GET':
+        #     if token[0].is_admin:
+        #         pays = Payment.objects.all()
+        #     else:
+        #         pays = Payment.objects.filter(user=token[0].user)
+        #     _list = []
+        #     for p in pays:
+        #         _list.append(p.to_json())
+        #     return my_response(True, 'success', _list)
+        # else:
+        #     return my_response(False, 'invalid method', {})
+    # else:
+    #     return my_response(False, 'token not exist', {})
 
 
 @csrf_exempt
