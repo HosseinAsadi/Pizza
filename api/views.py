@@ -712,7 +712,7 @@ def request_payment_url(request):
                 return my_response(True, 'success', info)
 
             except Exception as e:
-                return my_response(False, 'error in request_payment_url, Problem with payment operations, please try later.', {})
+                return my_response(False, 'error in request_payment_url, Problem with payment operations, please try later.' + str(e), {})
         else:
             return my_response(False, 'invalid method', {})
     else:
@@ -758,7 +758,7 @@ def order_payment(request):
 #                               message='user paid for his order with trackId: ' + str(o.track_id)
 #                           )
         except Exception as e:
-            return my_response(False, 'error in payment order, Problem with payment operations, please try later.', {})
+            return my_response(False, 'error in payment order, Problem with payment operations, please try later.' + str(e), {})
     elif request.method == 'GET':
         token = request.headers.get('token')
         token = Token.objects.filter(token=token)
