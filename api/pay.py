@@ -109,6 +109,6 @@ def pay_level2(request):
 
     res_json = r.json()
     if r.status_code == 200:
-        return r.json()
+        return res_json
     else:
         return res_json['outcome']['status']['reasonMessage']

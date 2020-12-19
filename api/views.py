@@ -651,7 +651,7 @@ def insert_user_order(request):
 
                 if 'transactionId' in info:
                     trans_id = info['transactionId']
-                    Payment.objects.filter(trans_id=trans_id).update(order=order, status='SUCCESS')
+                    Payment.objects.filter(trans_id=trans_id).update(order=order)
 
                 return my_response(True, 'success', order.to_json())
             else:
@@ -723,10 +723,12 @@ def request_payment_url(request):
 def order_payment(request):
     if request.method == 'POST':
         try:
+            trans_id = request.POST.get('MD')
             info = pay_level2(request)
             if info is str:
                 return my_response(False, info, info)
             else:
+                Payment.objects.filter(trans_id=trans_id).update(status='SUCCESS')
                 return my_response(True, 'success', info)
 
 #                 if info is None:
