@@ -218,8 +218,8 @@ def password_reminder(request):
         user = User.objects.filter(email=e)
         if user.exists():
             mail_content = 'your password: ' + user[0].password + ' for pizza app'
-            sender_gmail = 'pizzariaamicos@gmail.com'
-            sender_pass = 'C@lif0rnia2030'
+            sender_gmail = 'pizza.amicos.clifton@gmail.com'
+            sender_pass = 'Cisco1991'
             message = MIMEMultipart()
             message['From'] = sender_gmail
             message['To'] = e
@@ -256,8 +256,8 @@ def my_send_mail(request):
             otp = random.randint(10000, 99999)
             otp = str(otp)
             mail_content = 'confirmation code: ' + otp + ' for pizza app'
-            sender_gmail = 'pizzariaamicos@gmail.com'
-            sender_pass = 'C@lif0rnia2030'
+            sender_gmail = 'pizza.amicos.clifton@gmail.com'
+            sender_pass = 'Cisco1991'
             message = MIMEMultipart()
             message['From'] = sender_gmail
             message['To'] = receiver_email
