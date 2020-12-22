@@ -725,11 +725,15 @@ def order_payment(request):
         try:
             trans_id = request.POST.get('MD')
             info = pay_level2(request)
-            if info is str:
-                return my_response(False, info, info)
+
+            if 'outcome' in info:
+                if info['outcome']['status'] == 'SUCCESS':
+                    Payment.objects.filter(trans_id=trans_id).update(status='SUCCESS')
+                    return my_response(True, info['outcome']['reasonMessage'], info)
+                else:
+                    return my_response(False, info['outcome']['reasonMessage'], {})
             else:
-                Payment.objects.filter(trans_id=trans_id).update(status='SUCCESS')
-                return my_response(True, 'success', info)
+                return my_response(False, 'Problem with payment operations, please try later.', info)
 
 #                 if info is None:
 #                     return my_response(False, 'Problem with payment operations, please try again later. ', {})
@@ -760,7 +764,7 @@ def order_payment(request):
 #                               message='user paid for his order with trackId: ' + str(o.track_id)
 #                           )
         except Exception as e:
-            return my_response(False, 'error in payment order, Problem with payment operations, please try later.' + str(e), {})
+            return my_response(False, 'error in payment order, ' + str(e), {})
     elif request.method == 'GET':
         token = request.headers.get('token')
         token = Token.objects.filter(token=token)

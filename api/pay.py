@@ -91,9 +91,9 @@ def pay_level1(info):
                 'transaction': res_json['transaction']
             }
         else:
-            return res_json['outcome']['status']['reasonMessage']
+            return res_json['outcome']['reasonMessage']
     else:
-        return res_json['outcome']['status']['reasonMessage']
+        return res_json['outcome']['reasonMessage']
 
 
 def pay_level2(request):
@@ -107,8 +107,4 @@ def pay_level2(request):
     auth = "Basic {}".format(auth)
     r = requests.post(url, data=json.dumps(body), headers={"Authorization": auth, 'Content-Type': 'application/json'})
 
-    res_json = r.json()
-    if r.status_code == 200:
-        return res_json
-    else:
-        return res_json['outcome']['status']['reasonMessage']
+    return r.json()
