@@ -65,7 +65,7 @@ def register(request):
             user.save(force_insert=True)
             tok = get_random_string(length=32)
             tok = Token(user=user, token=tok, expiry_date=datetime.datetime.now())
-            tok.save(force_insert=True)
+            tok.save()
             o.delete()
             Device(dev_id=info['deviceId'], reg_id=info['deviceToken'], name=p, is_active=True).save()
             return my_response(True, 'user registered', tok.to_json())
