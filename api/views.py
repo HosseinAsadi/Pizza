@@ -40,9 +40,8 @@ def base(request):
 @csrf_exempt
 def register(request):
     if request.method == "POST":
+        info = loads(request.body.decode('utf-8'))
         try:
-            info = loads(request.body.decode('utf-8'))
-
             p = info['phone']
             e = info['email']
             this_otp = info['otp']
@@ -72,6 +71,7 @@ def register(request):
         except Exception as e:
             e = str(e)
             if e.__contains__('UNIQUE constraint'):
+                Device.objects.filter(dev_id=info['deviceId']).delete()
                 return my_response(False, 'user exist! please sign in', {})
             else:
                 return my_response(False, 'error in register, check body send, ' + e, {})
