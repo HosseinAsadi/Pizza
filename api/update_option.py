@@ -36,6 +36,7 @@ def update_option_size(option, sizes):
                 )
                 fo_sizes.remove(temp)
                 temp = None
+                break
         if temp is not None:
             FoodSize.objects.filter(food_size_id=temp.food_size_id).delete()
             fo_sizes.remove(temp)
