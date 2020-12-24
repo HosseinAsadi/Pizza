@@ -363,8 +363,16 @@ def get_home_info(request):
             foods = list(Food.objects.filter(rank__gt=4, status=True).order_by('rank'))
             popular_list = merge(foods, options, fav_option, fav_food)
 
-            #
-            group_with_children.insert(0, group_with_children.pop())
+            # To place the special offers at the top of the list
+            g_temp = None
+            for g in group_with_children:
+                if g['name'] == 'Special Offers':
+                    g_temp = g
+                    group_with_children.remove(g)
+                    break
+            if g_temp is not None:
+                group_with_children.insert(0, g_temp)
+
             context = {
                 'childrenWithGroup': group_with_children,
                 'popularFoods': popular_list,
