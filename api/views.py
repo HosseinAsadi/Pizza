@@ -707,19 +707,28 @@ def request_payment_url(request):
             try:
                 info = loads(request.body.decode('utf-8'))
                 info = pay_level1(info)
-                if info is str:
-                    return my_response(False, info, {})
-                user = token[0].user
-                payment = Payment(
-                    user=user,
-                    trans_id=info['transaction']['transactionId'],
-                    status='PENDING',
-                    amount=info['transaction']['amount'],
-                    trans_time=info['transaction']['transactionTime']
-                )
-                payment.save()
-                return my_response(True, 'success', info)
 
+                if info['outcome']['status'] == 'SUCCESS':
+                    user = token[0].user
+                    payment = Payment(
+                        user=user,
+                        trans_id=info['transaction']['transactionId'],
+                        status='PENDING',
+                        amount=info['transaction']['amount'],
+                        trans_time=info['transaction']['transactionTime']
+                    )
+                    payment.save()
+
+                    context = {
+                        'url': info['clientRedirect']['url'],
+                        'pareq': info['clientRedirect']['pareq'],
+                        'transaction': info['transaction']
+                    }
+
+                    return my_response(True, 'success', context)
+                else:
+                    return my_response(False, str(info), info)
+                
             except Exception as e:
                 return my_response(False, 'error in request_payment_url, Problem with payment operations, please try later.' + str(e), {})
         else:
