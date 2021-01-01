@@ -11,7 +11,8 @@ from django.views.decorators.csrf import csrf_exempt
 from fcm.models import Device
 
 from .models import User, Group, Food, FoodSize, FoodType, Option, Token, Order, RestaurantInfo, RestaurantAddress, \
-    PostCode, Offer, RestaurantTime, OrderFood, OrderOption, Favorite, FoodOption, Ticket, Address, Otp, OptionType, DoubleOptions
+    PostCode, Offer, RestaurantTime, OrderFood, OrderOption, Favorite, FoodOption, Ticket, Address, Otp, OptionType, \
+    DoubleOptions
 from django.core.paginator import Paginator
 
 admin.site.register(User)
@@ -390,107 +391,108 @@ def food(request, food_id=None):
     if token.exists() and token[0].is_admin:
         if request.method == 'POST' or request.method == 'PUT':
             # try:
-                info = loads(request.body.decode('utf-8'))
-                name = info['name']
-                describe = info['description']
-                price = info['price']
-                final_price = info['finalPrice']
-                image = info['image']
-                status = info['status']
-                is_double = info['isDouble']
-                numOfTy = info['numberOfType']
-                sizes = info['sizes']
-                types = info['types']
-                ops = info['options']
-                dp = info['doubleOptions']
-                o_types = info['optionTypes']
-                double_op = None
+            info = loads(request.body.decode('utf-8'))
+            name = info['name']
+            describe = info['description']
+            price = info['price']
+            final_price = info['finalPrice']
+            image = info['image']
+            status = info['status']
+            is_double = info['isDouble']
+            numOfTy = info['numberOfType']
+            sizes = info['sizes']
+            types = info['types']
+            ops = info['options']
+            dp = info['doubleOptions']
+            o_types = info['optionTypes']
+            double_op = None
 
+            try:
+                img_name = image_name() + '.png'
+                path = 'media/Images/' + img_name
+                img_data = base64.b64decode(image)
+                with open(path, 'wb') as f:
+                    f.write(img_data)
+            except:
+                img_name = image
 
-                try:
-                    img_name = image_name() + '.png'
-                    path = 'media/Images/' + img_name
-                    img_data = base64.b64decode(image)
-                    with open(path, 'wb') as f:
-                        f.write(img_data)
-                except:
-                    img_name = image
+            if request.method == 'POST':
+                group_id = info['groupId']
+                if dp is not None:
+                    double_op = DoubleOptions(name1=dp['name1'], name2=dp['name2'],
+                                              options_extra_price=dp['optionsExtraPrice'])
+                    double_op.save()
 
-                if request.method == 'POST':
-                    group_id = info['groupId']
-                    if dp is not None:
-                        double_op = DoubleOptions(name1=dp['name1'], name2=dp['name2'], options_extra_price=dp['optionsExtraPrice'])
-                        double_op.save()
-
-                    f = Food(
-                        group_id=group_id,
-                        name=name,
-                        description=describe,
-                        price=price,
-                        final_price=final_price,
-                        double_options=double_op,
-                        image=img_name,
-                        status=status,
-                        is_double=is_double,
-                        number_of_type=numOfTy
-                    )
-                    f.save()
-                    for s in sizes:
-                        size = s['size']
-                        s_price = s['price']
-                        FoodSize(
-                            food=f,
-                            size=size,
-                            price=s_price,
-                            extra_type_price=s['extraTypePrice'],
-                            extra_option_price=s['extraOptionPrice'],
-                        ).save()
-                    for t in types:
-                        _type = t['type']
-                        t_price = t['price']
-                        FoodType(food=f, type=_type, price=t_price).save()
-                    for ot in o_types:
-                        op_t = OptionType(food=f, name=ot['name'], option_type=ot['optionType'])
-                        op_t.save()
-                        for t in ot['children']:
-                            FoodType(food=f, type=t['type'], price=t['price'], option_type=op_t).save()
-                else:
-                    f = Food.objects.filter(food_id=food_id)
-                    if dp is not None:
-                        if dp['doubleOptionsId'] is not None:
-                            double_op = DoubleOptions.objects.filter(id=dp['doubleOptionsId'])
-                            double_op.update(name1=dp['name1'], name2=dp['name2'], options_extra_price=dp['optionsExtraPrice'])
-                            double_op = double_op[0]
-                        else:
-                            double_op = DoubleOptions(name1=dp['name1'], name2=dp['name2'],
-                                                      options_extra_price=dp['optionsExtraPrice'])
-                            double_op.save()
+                f = Food(
+                    group_id=group_id,
+                    name=name,
+                    description=describe,
+                    price=price,
+                    final_price=final_price,
+                    double_options=double_op,
+                    image=img_name,
+                    status=status,
+                    is_double=is_double,
+                    number_of_type=numOfTy
+                )
+                f.save()
+                for s in sizes:
+                    size = s['size']
+                    s_price = s['price']
+                    FoodSize(
+                        food=f,
+                        size=size,
+                        price=s_price,
+                        extra_type_price=s['extraTypePrice'],
+                        extra_option_price=s['extraOptionPrice'],
+                    ).save()
+                for t in types:
+                    _type = t['type']
+                    t_price = t['price']
+                    FoodType(food=f, type=_type, price=t_price).save()
+                for ot in o_types:
+                    op_t = OptionType(food=f, name=ot['name'], option_type=ot['optionType'])
+                    op_t.save()
+                    for t in ot['children']:
+                        FoodType(food=f, type=t['type'], price=t['price'], option_type=op_t).save()
+            else:
+                f = Food.objects.filter(food_id=food_id)
+                if dp is not None:
+                    if dp['doubleOptionsId'] is not None:
+                        double_op = DoubleOptions.objects.filter(id=dp['doubleOptionsId'])
+                        double_op.update(name1=dp['name1'], name2=dp['name2'],
+                                         options_extra_price=dp['optionsExtraPrice'])
+                        double_op = double_op[0]
                     else:
-                        if f[0].double_options is not None:
-                            DoubleOptions.objects.filter(id= f[0].double_options.id).delete()
+                        double_op = DoubleOptions(name1=dp['name1'], name2=dp['name2'],
+                                                  options_extra_price=dp['optionsExtraPrice'])
+                        double_op.save()
+                else:
+                    if f[0].double_options is not None:
+                        DoubleOptions.objects.filter(id=f[0].double_options.id).delete()
 
-                    f.update(
-                        name=name,
-                        description=describe,
-                        price=price,
-                        final_price=final_price,
-                        double_options=double_op,
-                        image=img_name,
-                        status=status,
-                        is_double=is_double,
-                        number_of_type=numOfTy
-                    )
-                    f = f.first()
-                    update_food(f, info)
+                f.update(
+                    name=name,
+                    description=describe,
+                    price=price,
+                    final_price=final_price,
+                    double_options=double_op,
+                    image=img_name,
+                    status=status,
+                    is_double=is_double,
+                    number_of_type=numOfTy
+                )
+                f = f.first()
+                update_food(f, info)
 
-                FoodOption.objects.filter(food=f).delete()
-                for o in ops:
-                    op = FoodSize.objects.get(food_size_id=o)
-                    FoodOption(food=f, option_size=op).save()
+            FoodOption.objects.filter(food=f).delete()
+            for o in ops:
+                op = FoodSize.objects.get(food_size_id=o)
+                FoodOption(food=f, option_size=op).save()
 
-                return my_response(True, 'success', f.to_json())
-            # except Exception as e:
-            #     return my_response(False, 'error in food, check send body, ' + str(e), {})
+            return my_response(True, 'success', f.to_json())
+        # except Exception as e:
+        #     return my_response(False, 'error in food, check send body, ' + str(e), {})
         elif request.method == 'DELETE':
             var = Food.objects.filter(food_id=food_id).delete()
             if var[0] != 0:
@@ -657,6 +659,9 @@ def orders_today(request):
         return my_response(False, 'token invalid', {})
 
 
+from django.db.models import Sum
+
+
 @csrf_exempt
 def invoice(request):
     token = request.headers.get('token')
@@ -666,7 +671,13 @@ def invoice(request):
             orders = Order.objects.extra(select={'day': 'date(datetime)'}).values('day').distinct()
             _list = []
             for o in orders:
-                _list.append(o['day'])
+                p = Payment.objects.filter(trans_time__date=o['day'], status='SUCCESS')
+                context = {
+                    'date': o['day'],
+                    'paymentCount': p.count()
+                }
+                context.update(p.aggregate(Sum('amount')))
+                _list.append(context)
             _list.reverse()
             return my_response(True, 'success', _list)
         else:
