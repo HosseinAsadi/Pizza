@@ -707,7 +707,7 @@ def request_payment_url(request):
             try:
                 info = loads(request.body.decode('utf-8'))
                 info = pay_level1(info)
-
+                
                 if info['outcome']['status'] == 'SUCCESS':
                     user = token[0].user
                     payment = Payment(
@@ -718,19 +718,19 @@ def request_payment_url(request):
                         trans_time=info['transaction']['transactionTime']
                     )
                     payment.save()
-
+                    
                     context = {
                         'url': info['clientRedirect']['url'],
                         'pareq': info['clientRedirect']['pareq'],
                         'transaction': info['transaction']
                     }
-
+                    
                     return my_response(True, 'success', context)
                 else:
-                    return my_response(False, str(info), info)
+                    return my_response(False, info['outcome']['reasonMessage'], info)
                 
             except Exception as e:
-                return my_response(False, 'error in request_payment_url, Problem with payment operations, please try later.' + str(e), {})
+                return my_response(False, 'your card information is not valid', {})
         else:
             return my_response(False, 'invalid method', {})
     else:
