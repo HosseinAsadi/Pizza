@@ -384,9 +384,13 @@ class OrderType(models.Model):
 class OrderOption(models.Model):
     order_food = models.ForeignKey(OrderFood, on_delete=models.CASCADE)
     option_size = models.ForeignKey(FoodSize, on_delete=models.CASCADE, default=None)
+    option_is_type2 = models.BooleanField(default=False)
 
     def to_json(self):
-        return self.option_size.to_json(with_option_name=True)
+        return {
+            'option': self.option_size.to_json(with_option_name=True),
+            'optionIsType2': self.option_is_type2,
+        }
 
 
 class RestaurantInfo(models.Model):

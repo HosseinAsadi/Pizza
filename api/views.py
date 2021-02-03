@@ -630,8 +630,8 @@ def insert_user_order(request):
                     for t in ts:
                         OrderType(order_food=of, food_type_id=t).save()
                     food_options = f['foodOptions']
-                    for op_size_id in food_options:
-                        OrderOption(order_food=of, option_size_id=op_size_id).save()
+                    for op in food_options:
+                        OrderOption(order_food=of, option_size_id=op['id'], option_is_type2=op['optionIsType2']).save()
                 options = info['options']
                 for o in options:
                     of = OrderFood(food_size_id=o['optionSizeId'], order=order, number=o['number'])
@@ -753,34 +753,6 @@ def order_payment(request):
             else:
                 return my_response(False, 'Problem with payment operations, please try later.', info)
 
-#                 if info is None:
-#                     return my_response(False, 'Problem with payment operations, please try again later. ', {})
-#                 user = token[0].user
-#                 trans_id = info['transaction']['transactionId']
-#                 trans_time = info['transaction']['transactionTime']
-#                 st = info['transaction']['status']
-#                 amount = info['transaction']['amount']
-
-#                 payment = Payment(
-#                     user=user,
-#                     trans_id=trans_id,
-#                     status=st,
-#                     amount=amount,
-#                     trans_time=trans_time
-#                 )
-#                 payment.save()
-
-#                 if st == 'FAILED':
-#                 return my_response(False, 'transaction failed', payment.to_json())
-#                   else:
-#                           o = Order.objects.filter(order_id=o_id)
-#                           o.update(completed=True)
-#                           o = o.first()
-#                           notif_to_admin(
-#                               orderId=o_id,
-#                               title='order payment',
-#                               message='user paid for his order with trackId: ' + str(o.track_id)
-#                           )
         except Exception as e:
             return my_response(False, 'error in payment order, ' + str(e), {})
     elif request.method == 'GET':
