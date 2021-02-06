@@ -5,6 +5,7 @@ import hashlib
 
 from background_task import background
 from api import admin
+from api.for_email import send_email
 from api.models import User, Group, Food, FoodSize, Token, Favorite, Order, Option, Address, \
     OrderOption, RestaurantInfo, RestaurantTime, OrderFood, FoodOption, FoodType, RestaurantAddress, Ticket, Otp, \
     Payment, OrderType, OptionType
@@ -218,20 +219,7 @@ def password_reminder(request):
         e = request.GET.get('email')
         user = User.objects.filter(email=e)
         if user.exists():
-            mail_content = 'your password: ' + user[0].password + ' for pizza app'
-            sender_gmail = 'pizza.amicos.clifton@gmail.com'
-            sender_pass = 'Cisco1991'
-            message = MIMEMultipart()
-            message['From'] = sender_gmail
-            message['To'] = e
-            message['Subject'] = 'Pizza App'
-            message.attach(MIMEText(mail_content, 'plain'))
-            session = smtplib.SMTP('smtp.gmail.com', 587)
-            session.starttls()
-            session.login(sender_gmail, sender_pass)
-            text = message.as_string()
-            session.sendmail(sender_gmail, e, text)
-            session.quit()
+            send_email('your password: ' + user[0].password + ' for pizza app', e)
             return my_response(True, 'your password sent to your email', {})
         else:
             return my_response(False, 'email not exist', {})
@@ -256,20 +244,7 @@ def my_send_mail(request):
 
             otp = random.randint(10000, 99999)
             otp = str(otp)
-            mail_content = 'confirmation code: ' + otp + ' for pizza app'
-            sender_gmail = 'pizza.amicos.clifton@gmail.com'
-            sender_pass = 'Cisco1991'
-            message = MIMEMultipart()
-            message['From'] = sender_gmail
-            message['To'] = receiver_email
-            message['Subject'] = 'Pizza App'
-            message.attach(MIMEText(mail_content, 'plain'))
-            session = smtplib.SMTP('smtp.gmail.com', 587)
-            session.starttls()
-            session.login(sender_gmail, sender_pass)
-            text = message.as_string()
-            session.sendmail(sender_gmail, receiver_email, text)
-            session.quit()
+            send_email('confirmation code: ' + otp + ' for pizza app', receiver_email)
             Otp.objects.filter(email=receiver_email).delete()
             Otp(email=receiver_email, otp=otp, expiry=get_hour_minute()).save()
             return my_response(True, 'success', {})

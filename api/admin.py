@@ -2,6 +2,7 @@ import base64
 import datetime
 from json import loads
 
+from api.for_email import send_email
 from api.update_food import *
 from api.update_option import *
 from api.views import my_response, image_name
@@ -730,6 +731,11 @@ def accept_reject_order(request):
                     de_cost = 0
                 p = order.user.phone
                 users_notif = Device.objects.filter(name=p)
+
+                
+                send_email(mess, order.user.email, title='Pizza App Order')
+
+
                 for un in users_notif:
                     un.send_message(
                         {
