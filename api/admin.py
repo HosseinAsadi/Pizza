@@ -16,6 +16,8 @@ from .models import User, Group, Food, FoodSize, FoodType, Option, Token, Order,
     DoubleOptions
 from django.core.paginator import Paginator
 
+from django.db.models import Sum, DecimalField
+
 admin.site.register(User)
 admin.site.register(Group)
 admin.site.register(Food)
@@ -597,7 +599,6 @@ def filter_order(request):
                 date = request.GET.get('date')
                 if date is not None:
                     orders = orders.filter(datetime__date=date)
-
                 delivery = request.GET.get('delivery')
                 if delivery is not None:
                     if delivery == '0':
@@ -620,12 +621,16 @@ def filter_order(request):
                         p_type = True
                     orders = orders.filter(payment_type=p_type)
 
+                context = {
+                    'sumOfOrders': orders.count(),
+                }
+                context.update(orders.aggregate(Sum('total_price')))
+
                 paginator = Paginator(orders, 25)
                 try:
                     page = int(request.GET.get('page'))
                 except Exception as e:
                     page = 1
-
                 try:
                     orders = paginator.page(page)
                 except Exception as e:
@@ -634,7 +639,12 @@ def filter_order(request):
                 if page <= paginator.num_pages:
                     for o in orders.object_list:
                         _list.append(o.to_json(with_customer=True))
-                return my_response(True, 'success', _list)
+
+                context.update(
+                    {'orders': _list}
+                )
+
+                return my_response(True, 'success', context)
             except Exception as e:
                 return my_response(False, 'error in filter order, check send query params, ' + str(e), {})
         else:
@@ -658,9 +668,6 @@ def orders_today(request):
             return my_response(False, 'invalid method', {})
     else:
         return my_response(False, 'token invalid', {})
-
-
-from django.db.models import Sum
 
 
 @csrf_exempt
@@ -732,9 +739,7 @@ def accept_reject_order(request):
                 p = order.user.phone
                 users_notif = Device.objects.filter(name=p)
 
-                
                 send_email(mess, order.user.email, title='Pizza App Order')
-
 
                 for un in users_notif:
                     un.send_message(
