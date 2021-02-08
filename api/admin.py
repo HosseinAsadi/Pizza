@@ -2,6 +2,8 @@ import base64
 import datetime
 from json import loads
 
+from django.db.models.functions import TruncMonth
+
 from api.for_email import send_email
 from api.update_food import *
 from api.update_option import *
@@ -596,9 +598,10 @@ def filter_order(request):
                 tr_id = request.GET.get('trackId')
                 if tr_id is not None:
                     orders = orders.filter(track_id__contains=tr_id)
-                date = request.GET.get('date')
-                if date is not None:
-                    orders = orders.filter(datetime__date=date)
+                from_date = request.GET.get('fromDate')
+                to_date = request.GET.get('toDate')
+                if from_date is not None:
+                    orders = orders.filter(datetime__date__range=(from_date, to_date))
                 delivery = request.GET.get('delivery')
                 if delivery is not None:
                     if delivery == '0':
@@ -668,6 +671,10 @@ def orders_today(request):
             return my_response(False, 'invalid method', {})
     else:
         return my_response(False, 'token invalid', {})
+
+
+
+#months = Payment.objects.filter(status='SUCCESS').annotate(month=TruncMonth('trans_time')).values('month').distinct()
 
 
 @csrf_exempt
