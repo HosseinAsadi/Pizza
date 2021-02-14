@@ -746,6 +746,7 @@ def accept_reject_order(request):
                 p = order.user.phone
                 users_notif = Device.objects.filter(name=p)
 
+                mess = 'order ' + order.track_id + ': ' + mess
                 send_email(mess, order.user.email, title='Pizza App Order')
 
                 for un in users_notif:
@@ -760,7 +761,7 @@ def accept_reject_order(request):
                             'click_action': 'FLUTTER_NOTIFICATION_CLICK',
                         },
                         notification={
-                            'title': 'order',
+                            'title': 'Pizza App Order',
                             'body': mess,
                             'click_action': 'FLUTTER_NOTIFICATION_CLICK',
                             "sound": "default",
